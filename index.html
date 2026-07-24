@@ -61,6 +61,7 @@
             font-size: 0.9rem;
             color: #666;
             margin-bottom: 1.5rem;
+            line-height: 1.5;
         }
 
         .sentence-box {
@@ -531,6 +532,30 @@
             setupGame("苦手特訓モード (不正解が多い問題)");
         }
 
+        function updateProgressDisplay() {
+            const remainingCount = document.getElementById("remaining-count");
+            const scoreEl = document.getElementById("score");
+            const totalProgressEl = document.getElementById("total-progress");
+
+            if (remainingCount) remainingCount.textContent = availableQuizes.length;
+            if (scoreEl) scoreEl.textContent = score;
+
+            if (totalProgressEl && currentMode && quizDatabases[currentMode]) {
+                const totalQuestionsInMode = quizDatabases[currentMode].length;
+                // appear が 1回以上の問題数を「完了した問題」として数える
+                let completedCount = 0;
+                for (let id in currentQuizStats) {
+                    if (currentQuizStats[id].appeared > 0) {
+                        completedCount++;
+                    }
+                }
+                if (completedCount > totalQuestionsInMode) {
+                    completedCount = totalQuestionsInMode;
+                }
+                totalProgressEl.textContent = `${totalQuestionsInMode}問中 ${completedCount}問回答済み`;
+            }
+        }
+
         function setupGame(modeSubName) {
             score = 0;
             sessionWrongQuestions = [];
@@ -544,7 +569,10 @@
                 <div class="settings-box">
                     <label><input type="checkbox" id="auto-audio-toggle" ${isAutoAudioEnabled ? 'checked' : ''} onchange="toggleAudioSetting()"> 解答後に音声を自動再生する</label>
                 </div>
-                <div class="score">残り問題数: <span id="remaining-count">10</span> / 正解数: <span id="score">0</span></div>
+                <div class="score">
+                    残り問題数 (今回の10問): <span id="remaining-count">10</span> / 正解数: <span id="score">0</span><br>
+                    時制の進捗: <span id="total-progress">算出中...</span>
+                </div>
 
                 <div class="sentence-box" id="quiz-container">
                     <div class="sentence" id="sentence-display"></div>
@@ -594,9 +622,7 @@
 
             isWaitingForNext = false;
             const submitBtn = document.getElementById("submit-btn");
-            const remainingCount = document.getElementById("remaining-count");
             if (submitBtn) submitBtn.textContent = "回答する";
-            if (remainingCount) remainingCount.textContent = availableQuizes.length;
 
             const randomIndex = Math.floor(Math.random() * availableQuizes.length);
             currentQuiz = availableQuizes[randomIndex];
@@ -606,6 +632,8 @@
             }
             currentQuizStats[currentQuiz.id].appeared++;
             saveStatsForMode(currentMode, currentQuizStats);
+
+            updateProgressDisplay();
 
             const sentenceDisplay = document.getElementById("sentence-display");
             const hintDisplay = document.getElementById("hint-display");
@@ -659,8 +687,7 @@
                 feedbackEl.className = "feedback correct";
                 score++;
                 
-                const scoreEl = document.getElementById("score");
-                if (scoreEl) scoreEl.textContent = score;
+                updateProgressDisplay();
 
                 if (isAutoAudioEnabled) {
                     setTimeout(() => {
