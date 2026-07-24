@@ -182,12 +182,12 @@
         .menu-container {
             display: flex;
             flex-direction: column;
-            gap: 1rem;
+            gap: 0.8rem;
             margin-top: 1.5rem;
         }
     </style>
 </head>
-<body>
+<body onclick="initAudioOnInteraction()">
 
     <div class="card" id="app-card">
         <!-- 動的に画面が切り替わります -->
@@ -413,6 +413,13 @@
             return audioCtx;
         }
 
+        function initAudioOnInteraction() {
+            const ctx = getAudioContext();
+            if (ctx && ctx.state === 'suspended') {
+                ctx.resume();
+            }
+        }
+
         function playSound(type) {
             try {
                 const ctx = getAudioContext();
@@ -464,23 +471,41 @@
             return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
         }
 
+        function getCompletedCountForMode(mode) {
+            const stats = loadStatsForMode(mode);
+            const total = quizDatabases[mode].length;
+            let completed = 0;
+            for (let id in stats) {
+                if (stats[id].appeared > 0) {
+                    completed++;
+                }
+            }
+            if (completed > total) completed = total;
+            return { completed, total };
+        }
+
         function showTopMenu() {
             currentMode = null;
             const card = document.getElementById("app-card");
+            
+            let menuHtml = '';
+            for (let modeKey in modeNames) {
+                const { completed, total } = getCompletedCountForMode(modeKey);
+                menuHtml += `<button onclick="startMode('${modeKey}')">${modeNames[modeKey]} <span style="font-size:0.85rem; opacity:0.85; font-weight:normal;">(${completed}/${total})</span></button>`;
+            }
+
             card.innerHTML = `
                 <h1>ブラジル・ポルトガル語 不規則動詞マスター</h1>
                 <div class="subtitle">学習したい時制モードを選択してください</div>
                 <div class="menu-container">
-                    <button onclick="startMode('present')">現在形</button>
-                    <button onclick="startMode('preterite')">完全過去形</button>
-                    <button onclick="startMode('imperfect')">不完全過去形</button>
-                    <button onclick="startMode('subjunctive')">接続法現在形</button>
+                    ${menuHtml}
                     <button onclick="resetAllStats()" class="btn-danger" style="margin-top: 1rem;">学習データをリセット・初期化</button>
                 </div>
             `;
         }
 
         function startMode(mode) {
+            initAudioOnInteraction();
             currentMode = mode;
             currentQuizStats = loadStatsForMode(mode);
             startNormalMode();
@@ -501,9 +526,9 @@
         }
 
         function startNormalMode() {
+            initAudioOnInteraction();
             const master = getMasterData();
             
-            // 全問1周（すべての問題の appeared が 1回以上）しているかチェック
             const totalQuestionsInMode = quizDatabases[currentMode].length;
             let completedCount = 0;
             for (let id in currentQuizStats) {
@@ -512,7 +537,6 @@
                 }
             }
 
-            // 1周し終えていたら、出題回数をすべてリセットして0に戻す
             if (completedCount >= totalQuestionsInMode) {
                 for (let id in currentQuizStats) {
                     currentQuizStats[id].appeared = 0;
@@ -533,6 +557,7 @@
         }
 
         function startWeaknessMode() {
+            initAudioOnInteraction();
             const master = getMasterData();
             master.sort((a, b) => {
                 if (b.incorrect !== a.incorrect) {
@@ -560,17 +585,8 @@
             if (scoreEl) scoreEl.textContent = score;
 
             if (totalProgressEl && currentMode && quizDatabases[currentMode]) {
-                const totalQuestionsInMode = quizDatabases[currentMode].length;
-                let completedCount = 0;
-                for (let id in currentQuizStats) {
-                    if (currentQuizStats[id].appeared > 0) {
-                        completedCount++;
-                    }
-                }
-                if (completedCount > totalQuestionsInMode) {
-                    completedCount = totalQuestionsInMode;
-                }
-                totalProgressEl.textContent = `${totalQuestionsInMode}問中 ${completedCount}問回答済み`;
+                const { completed, total } = getCompletedCountForMode(currentMode);
+                totalProgressEl.textContent = `${total}問中 ${completed}問回答済み`;
             }
         }
 
@@ -670,6 +686,7 @@
         }
 
         function handleAction() {
+            initAudioOnInteraction();
             if (isWaitingForNext) {
                 const index = availableQuizes.indexOf(currentQuiz);
                 if (index > -1) {
@@ -781,6 +798,7 @@
         }
 
         function startReviewMode() {
+            initAudioOnInteraction();
             if (allTimeWrongQuestions.length === 0) return;
             availableQuizes = [...allTimeWrongQuestions];
             sessionWrongQuestions = [];
