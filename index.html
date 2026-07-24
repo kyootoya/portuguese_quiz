@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ブラジル・ポルトガル語 不規則動詞マスター</title>
+    <style>
+        :root {
+            --primary-color: #009b3a;
+            --secondary-color: #fedf00;
+            --bg-color: #f4f7f6;
+            --text-color: #333;
+        }
+
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 1rem;
+            box-sizing: border-box;
+        }
+
+        .card {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 500px;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 1.3rem;
+            margin-bottom: 0.3rem;
+            color: var(--primary-color);
+        }
+
+        .subtitle {
+            font-size: 0.8rem;
+            color: #777;
+            margin-bottom: 0.8rem;
+        }
+
+        .settings-box {
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+            color: #555;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .score {
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 1.5rem;
+        }
+
+        .sentence-box {
+            background: #eef9f2;
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+        }
+
+        .sentence {
+            font-size: 1.25rem;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 0.8rem;
+            line-height: 1.4;
+        }
+
+        .translation {
+            font-size: 0.95rem;
+            color: #666;
+            margin-bottom: 0.8rem;
+        }
+
+        .audio-btn {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 0.4rem 0.8rem;
+            font-size: 0.85rem;
+            border-radius: 4px;
+            cursor: pointer;
+            width: auto;
+            display: inline-block;
+            font-weight: normal;
+            margin-top: 0.2rem;
+        }
+        .audio-btn:hover {
+            background-color: #2980b9;
+        }
+
+        .hint {
+            font-size: 0.85rem;
+            color: #888;
+            margin-bottom: 1rem;
+        }
+
+        input[type="text"] {
+            width: 80%;
+            padding: 0.75rem;
+            font-size: 1.1rem;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            margin-bottom: 1rem;
+            text-align: center;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        input[type="text"]:focus {
+            border-color: var(--primary-color);
+        }
+
+        button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            font-size: 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            width: 100%;
+            font-weight: bold;
+            transition: background-color 0.2s;
+            margin-bottom: 0.5rem;
+        }
+
+        button:hover {
+            background-color: #007a2e;
+        }
+
+        .btn-secondary {
+            background-color: #34495e;
+        }
+        .btn-secondary:hover {
+            background-color: #2c3e50;
+        }
+
+        .btn-danger {
+            background-color: #c0392b;
+        }
+        .btn-danger:hover {
+            background-color: #962d22;
+        }
+
+        .btn-warning {
+            background-color: #e67e22;
+        }
+        .btn-warning:hover {
+            background-color: #d35400;
+        }
+
+        .feedback {
+            margin-top: 1rem;
+            font-weight: bold;
+            font-size: 1.05rem;
+            min-height: 1.5rem;
+            line-height: 1.4;
+        }
+
+        .correct {
+            color: #27ae60;
+        }
+
+        .incorrect {
+            color: #c0392b;
+        }
+
+        .menu-container {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="card" id="app-card">
+        <!-- 動的に画面が切り替わります -->
+    </div>
+
+    <script>
+        let isAutoAudioEnabled = true;
+
+        const quizDatabases = {
+            present: [
+                { id: 1, sentence: "Eu ___ uma pessoa feliz.", answer: "sou", infinitive: "ser", person: "1sg", translation: "私は幸せな人間である。" },
+                { id: 2, sentence: "Ele ___ um bom profissional.", answer: "é", infinitive: "ser", person: "3sg", translation: "彼は優秀なプロフェッショナルである。" },
+                { id: 3, sentence: "Nós ___ grandes amigos.", answer: "somos", infinitive: "ser", person: "1pl", translation: "私たちは大親友である。" },
+                { id: 4, sentence: "Eles ___ muito inteligentes.", answer: "são", infinitive: "ser", person: "3pl", translation: "彼らはとても頭が良い。" },
+                { id: 5, sentence: "Eu ___ muito ocupado hoje.", answer: "estou", infinitive: "estar", person: "1sg", translation: "私は今日とても忙しい。" },
+                { id: 6, sentence: "Você ___ bem?", answer: "está", infinitive: "estar", person: "3sg", translation: "あなたは元気であるか？" },
+                { id: 7, sentence: "Nós ___ em casa agora.", answer: "estamos", infinitive: "estar", person: "1pl", translation: "私たちは今家にいる。" },
+                { id: 8, sentence: "Elas ___ felizes com a notícia.", answer: "estão", infinitive: "estar", person: "3pl", translation: "彼女たちはそのニュースに喜んでいる。" },
+                { id: 9, sentence: "Eu ___ um carro novo.", answer: "tenho", infinitive: "ter", person: "1sg", translation: "私は新しい車を持っている。" },
+                { id: 10, sentence: "Ela ___ muitos livros.", answer: "tem", infinitive: "ter", person: "3sg", translation: "彼女はたくさんの本を持っている。" },
+                { id: 11, sentence: "Nós ___ muito trabalho.", answer: "temos", infinitive: "ter", person: "1pl", translation: "私たちは仕事がたくさんある。" },
+                { id: 12, sentence: "Vocês ___ tempo para isso?", answer: "têm", infinitive: "ter", person: "3pl", translation: "あなたたちにはその時間があるか？" },
+                { id: 13, sentence: "Eu ___ ao supermercado.", answer: "vou", infinitive: "ir", person: "1sg", translation: "私はスーパーに行く。" },
+                { id: 14, sentence: "Ele ___ para o trabalho de ônibus.", answer: "vai", infinitive: "ir", person: "3sg", translation: "彼はバスで仕事に行く。" },
+                { id: 15, sentence: "Nós ___ viajar no fim de semana.", answer: "vamos", infinitive: "ir", person: "1pl", translation: "私たちは週末に旅行に行く。" },
+                { id: 16, sentence: "Eles ___ à festa hoje à noite.", answer: "vão", infinitive: "ir", person: "3pl", translation: "彼らは今夜パーティーに行く。" },
+                { id: 17, sentence: "Eu não ___ ir hoje.", answer: "posso", infinitive: "poder", person: "1sg", translation: "私は今日行くことができない。" },
+                { id: 18, sentence: "Você ___ me ajudar?", answer: "pode", infinitive: "poder", person: "3sg", translation: "私を手伝うことができるか？" },
+                { id: 19, sentence: "Nós ___ resolver isso.", answer: "podemos", infinitive: "poder", person: "1pl", translation: "私たちはそれを解決できる。" },
+                { id: 20, sentence: "Eles ___ entrar agora.", answer: "podem", infinitive: "poder", person: "3pl", translation: "彼らは今入ることができる。" },
+                { id: 21, sentence: "Eu não ___ falar espanhol.", answer: "sei", infinitive: "saber", person: "1sg", translation: "私はスペイン語を話すことができない。" },
+                { id: 22, sentence: "Ela ___ onde fica a loja.", answer: "sabe", infinitive: "saber", person: "3sg", translation: "彼女はその店がどこにあるか知っている。" },
+                { id: 23, sentence: "Nós ___ a resposta.", answer: "sabemos", infinitive: "saber", person: "1pl", translation: "私たちは答えを知っている。" },
+                { id: 24, sentence: "Eles não ___ de nada.", answer: "sabem", infinitive: "saber", person: "3pl", translation: "彼らは何も知らない。" },
+                { id: 25, sentence: "Eu ___ um café, por favor.", answer: "quero", infinitive: "querer", person: "1sg", translation: "私はコーヒーを一杯ほしい。" },
+                { id: 26, sentence: "Ele ___ comprar uma casa.", answer: "quer", infinitive: "querer", person: "3sg", translation: "彼は家を買いたがっている。" },
+                { id: 27, sentence: "Nós ___ aprender português.", answer: "queremos", infinitive: "querer", person: "1pl", translation: "私たちはポルトガル語を学びたい。" },
+                { id: 28, sentence: "Elas ___ descansar um pouco.", answer: "querem", infinitive: "querer", person: "3pl", translation: "彼女たちは少し休みたがっている。" },
+                { id: 29, sentence: "Eu ___ o jantar todos os dias.", answer: "faço", infinitive: "fazer", person: "1sg", translation: "私は毎日夕食を作る。" },
+                { id: 30, sentence: "Ele ___ os exercícios sozinho.", answer: "faz", infinitive: "fazer", person: "3sg", translation: "彼は一人でその練習問題を解く。" },
+                { id: 31, sentence: "Nós ___ um bolo delicioso.", answer: "fazemos", infinitive: "fazer", person: "1pl", translation: "私たちは美味しいケーキを作る。" },
+                { id: 32, sentence: "Eles ___ muito barulho.", answer: "fazem", infinitive: "fazer", person: "3pl", translation: "彼らはとても騒がしい。" },
+                { id: 33, sentence: "Eu sempre ___ um presente a ela.", answer: "dou", infinitive: "dar", person: "1sg", translation: "私はいつも彼女にプレゼントをあげる。" },
+                { id: 34, sentence: "Ela ___ aulas de inglês.", answer: "dá", infinitive: "dar", person: "3sg", translation: "彼女は英語のレッスンをする。" },
+                { id: 35, sentence: "Nós ___ uma festa no sábado.", answer: "damos", infinitive: "dar", person: "1pl", translation: "私たちは土曜日にパーティーを開く。" },
+                { id: 36, sentence: "Eles ___ boas dicas.", answer: "dão", infinitive: "dar", person: "3pl", translation: "彼らは良いアドバイスをくれる。" },
+                { id: 37, sentence: "Eu ___ a verdade sempre.", answer: "digo", infinitive: "dizer", person: "1sg", translation: "私はいつも本当のことを言う。" },
+                { id: 38, sentence: "Ele ___ que vai chover.", answer: "diz", infinitive: "dizer", person: "3sg", translation: "彼は雨が降ると言う。" },
+                { id: 39, sentence: "Nós ___ não a isso.", answer: "dizemos", infinitive: "dizer", person: "1pl", translation: "私たちはそれにはノーと言う。" },
+                { id: 40, sentence: "Elas ___ que gostaram.", answer: "dizem", infinitive: "dizer", person: "3pl", translation: "彼女たちは気に入ったと言う。" },
+                { id: 41, sentence: "Eu ___ da Bahia.", answer: "venho", infinitive: "vir", person: "1sg", translation: "私はバイーア州出身である。" },
+                { id: 42, sentence: "Ele ___ aqui toda semana.", answer: "vem", infinitive: "vir", person: "3sg", translation: "彼は毎週ここにやって来る。" },
+                { id: 43, sentence: "Nós ___ de carro.", answer: "vimos", infinitive: "vir", person: "1pl", translation: "私たちは車で来る。" },
+                { id: 44, sentence: "Eles ___ de longe.", answer: "vêm", infinitive: "vir", person: "3pl", translation: "彼らは遠くからやって来る。" },
+                { id: 45, sentence: "Eu ___ o mar da minha janela.", answer: "vejo", infinitive: "ver", person: "1sg", translation: "私は窓から海が見える。" },
+                { id: 46, sentence: "Ela ___ um filme na TV.", answer: "vê", infinitive: "ver", person: "3sg", translation: "彼女はテレビで映画を見ている。" },
+                { id: 47, sentence: "Nós ___ os nossos amigos.", answer: "vemos", infinitive: "ver", person: "1pl", translation: "私たちは友達に会う。" },
+                { id: 48, sentence: "Eles ___ tudo.", answer: "veem", infinitive: "ver", person: "3pl", translation: "彼らはすべてを見ている。" },
+                { id: 49, sentence: "Eu ___ o meu violão.", answer: "trago", infinitive: "trazer", person: "1sg", translation: "私は自分のギターを持って来る。" },
+                { id: 50, sentence: "Ela ___ um bolo para a festa.", answer: "traz", infinitive: "trazer", person: "3sg", translation: "彼女はパーティーにケーキを持って来る。" },
+                { id: 51, sentence: "Nós ___ boas notícias.", answer: "trazemos", infinitive: "trazer", person: "1pl", translation: "私たちは良い知らせを持って来る。" },
+                { id: 52, sentence: "Eles ___ os documentos.", answer: "trazem", infinitive: "trazer", person: "3pl", translation: "彼らは書類を持って来る。" },
+                { id: 53, sentence: "Eu ___ de casa cedo.", answer: "saio", infinitive: "sair", person: "1sg", translation: "私は朝早く家を出る。" },
+                { id: 54, sentence: "Ele ___ com os amigos.", answer: "sai", infinitive: "sair", person: "3sg", translation: "彼は友達と出かける。" },
+                { id: 55, sentence: "Nós ___ para jantar.", answer: "saímos", infinitive: "sair", person: "1pl", translation: "私たちは夕食に出かける。" },
+                { id: 56, sentence: "Elas ___ cedo do trabalho.", answer: "saem", infinitive: "sair", person: "3pl", translation: "彼女たちは仕事から早く上がる。" },
+                { id: 57, sentence: "Eu ___ a mesa para o almoço.", answer: "ponho", infinitive: "pôr", person: "1sg", translation: "私は昼食のテーブルセッティングをする。" },
+                { id: 58, sentence: "Ela ___ o livro na estante.", answer: "põe", infinitive: "pôr", person: "3sg", translation: "彼女は本棚に本を置く。" },
+                { id: 59, sentence: "Nós ___ ordem na sala.", answer: "pomos", infinitive: "pôr", person: "1pl", translation: "私たちは部屋を片付ける。" },
+                { id: 60, sentence: "Eles ___ açúcar no café.", answer: "põem", infinitive: "pôr", person: "3pl", translation: "彼らはコーヒーに砂糖を入れる。" },
+                { id: 61, sentence: "___ muito trânsito hoje.", answer: "há", infinitive: "haver", person: "3sg", translation: "今日は交通渋滞がたくさんある。" }
+            ],
+            preterite: [
+                { id: 1, sentence: "Eu ___ muito feliz ontem.", answer: "fui", infinitive: "ser", person: "1sg", translation: "私は昨日とても幸せだった。" },
+                { id: 2, sentence: "Ele ___ o vencedor da prova.", answer: "foi", infinitive: "ser", person: "3sg", translation: "彼はそのテストの勝者だった。" },
+                { id: 3, sentence: "Nós ___ amigos na infância.", answer: "fomos", infinitive: "ser", person: "1pl", translation: "私たちは子供のころからの友達だった。" },
+                { id: 4, sentence: "Eles ___ ótimos professores.", answer: "foram", infinitive: "ser", person: "3pl", translation: "彼らは素晴らしい教師だった。" },
+                { id: 5, sentence: "Eu ___ em casa o dia todo.", answer: "estive", infinitive: "estar", person: "1sg", translation: "私は一日中家にいた。" },
+                { id: 6, sentence: "Você ___ lá ontem?", answer: "esteve", infinitive: "estar", person: "3sg", translation: "あなたは昨日そこにいましたか？" },
+                { id: 7, sentence: "Nós ___ ocupados na semana passada.", answer: "estivemos", infinitive: "estar", person: "1pl", translation: "私たちは先週忙しかった。" },
+                { id: 8, sentence: "Elas ___ doentes ontem.", answer: "estiveram", infinitive: "estar", person: "3pl", translation: "彼女たちは昨日病気だった。" },
+                { id: 9, sentence: "Eu ___ muito trabalho ontem.", answer: "tive", infinitive: "ter", person: "1sg", translation: "私は昨日たくさんの仕事があった。" },
+                { id: 10, sentence: "Ela ___ uma ideia brilhante.", answer: "teve", infinitive: "ter", person: "3sg", translation: "彼女は素晴らしいアイデアを思いついた。" },
+                { id: 11, sentence: "Nós ___ uma reunião longa.", answer: "tivemos", infinitive: "ter", person: "1pl", translation: "私たちは長い会議があった。" },
+                { id: 12, sentence: "Eles ___ problemas com o carro.", answer: "tiveram", infinitive: "ter", person: "3pl", translation: "彼らは車のトラブルに見舞われた。" },
+                { id: 13, sentence: "Eu ___ ao cinema ontem.", answer: "fui", infinitive: "ir", person: "1sg", translation: "私は昨日映画館に行った。" },
+                { id: 14, sentence: "Ele ___ viajar no mês passado.", answer: "foi", infinitive: "ir", person: "3sg", translation: "彼は先月旅行に行った。" },
+                { id: 15, sentence: "Nós ___ à praia no domingo.", answer: "fomos", infinitive: "ir", person: "1pl", translation: "私たちは日曜日にビーチに行った。" },
+                { id: 16, sentence: "Elas ___ cedo para casa.", answer: "foram", infinitive: "ir", person: "3pl", translation: "彼女たちは早く家に帰った。" },
+                { id: 17, sentence: "Eu não ___ fazer isso.", answer: "pude", infinitive: "poder", person: "1sg", translation: "私はそれをすることができなかった。" },
+                { id: 18, sentence: "Você ___ vir à festa?", answer: "pôde", infinitive: "poder", person: "3sg", translation: "あなたはパーティーに来ることができましたか？" },
+                { id: 19, sentence: "Nós não ___ terminar a tarefa.", answer: "pudemos", infinitive: "poder", person: "1pl", translation: "私たちは課題を終えることができなかった。" },
+                { id: 20, sentence: "Eles ___ resolver o caso.", answer: "puderam", infinitive: "poder", person: "3pl", translation: "彼らはその事件を解決することができた。" },
+                { id: 21, sentence: "Eu não ___ a resposta.", answer: "soube", infinitive: "saber", person: "1sg", translation: "私はその答えを知らなかった。" },
+                { id: 22, sentence: "Ela ___ da notícia ontem.", answer: "soube", infinitive: "saber", person: "3sg", translation: "彼女は昨日そのニュースを知った。" },
+                { id: 23, sentence: "Nós ___ de tudo.", answer: "soubemos", infinitive: "saber", person: "1pl", translation: "私たちはすべてを知った。" },
+                { id: 24, sentence: "Eles não ___ de nada.", answer: "souberam", infinitive: "saber", person: "3pl", translation: "彼らは何も知らなかった。" },
+                { id: 25, sentence: "Eu ___ comprar o ingresso.", answer: "quis", infinitive: "querer", person: "1sg", translation: "私はチケットを買いたかった。" },
+                { id: 26, sentence: "Ele não ___ falar com ninguém.", answer: "quis", infinitive: "querer", person: "3sg", translation: "彼は誰とも話そうとしなかった。" },
+                { id: 27, sentence: "Nós ___ ajudar.", answer: "quisemos", infinitive: "querer", person: "1pl", translation: "私たちは手伝いたいと思った。" },
+                { id: 28, sentence: "Elas ___ sair mais cedo.", answer: "quiseram", infinitive: "querer", person: "3pl", translation: "彼女たちはもっと早く出かけたがった。" },
+                { id: 29, sentence: "Eu ___ um bolo ontem.", answer: "fiz", infinitive: "fazer", person: "1sg", translation: "私は昨日ケーキを作った。" },
+                { id: 30, sentence: "Ele ___ o dever de casa.", answer: "fez", infinitive: "fazer", person: "3sg", translation: "彼は宿題をやった。" },
+                { id: 31, sentence: "Nós ___ uma viagem inesquecível.", answer: "fizemos", infinitive: "fazer", person: "1pl", translation: "私たちは忘れられない旅行をした。" },
+                { id: 32, sentence: "Eles ___ muito barulho na festa.", answer: "fizeram", infinitive: "fazer", person: "3pl", translation: "彼らはパーティーですごく騒いだ。" },
+                { id: 33, sentence: "Eu ___ um presente a ela.", answer: "dei", infinitive: "dar", person: "1sg", translation: "私は彼女にプレゼントをあげた。" },
+                { id: 34, sentence: "Ela ___ uma ótima festa.", answer: "deu", infinitive: "dar", person: "3sg", translation: "彼女は素晴らしいパーティーを開いた。" },
+                { id: 35, sentence: "Nós ___ uma boa gorjeta.", answer: "demos", infinitive: "dar", person: "1pl", translation: "私たちは良いチップをあげた。" },
+                { id: 36, sentence: "Eles ___ a notícia ontem.", answer: "deram", infinitive: "dar", person: "3pl", translation: "彼らは昨日その知らせを伝えた。" },
+                { id: 37, sentence: "Eu ___ a verdade ao juiz.", answer: "disse", infinitive: "dizer", person: "1sg", translation: "私は裁判官に本当のことを言った。" },
+                { id: 38, sentence: "Ele ___ que viria.", answer: "disse", infinitive: "dizer", person: "3sg", translation: "彼は来ると言った。" },
+                { id: 39, sentence: "Nós ___ não ao plano.", answer: "dissemos", infinitive: "dizer", person: "1pl", translation: "私たちはその計画にノーと言った。" },
+                { id: 40, sentence: "Elas ___ que gostaram.", answer: "disseram", infinitive: "dizer", person: "3pl", translation: "彼女たちは気に入ったと言った。" },
+                { id: 41, sentence: "Eu ___ de manhã.", answer: "vim", infinitive: "vir", person: "1sg", translation: "私は朝にやって来た。" },
+                { id: 42, sentence: "Ele ___ de ônibus.", answer: "veio", infinitive: "vir", person: "3sg", translation: "彼はバスでやって来た。" },
+                { id: 43, sentence: "Nós ___ cedo.", answer: "viemos", infinitive: "vir", person: "1pl", translation: "私たちは早くやって来た。" },
+                { id: 44, sentence: "Eles ___ de longe.", answer: "vieram", infinitive: "vir", person: "3pl", translation: "彼らは遠くからやって来た。" },
+                { id: 45, sentence: "Eu ___ um filme ontem.", answer: "vi", infinitive: "ver", person: "1sg", translation: "私は昨日映画を見た。" },
+                { id: 46, sentence: "Ela ___ o acidente.", answer: "viu", infinitive: "ver", person: "3sg", translation: "彼女はその事故を目撃した。" },
+                { id: 47, sentence: "Nós ___ os nossos amigos.", answer: "vimos", infinitive: "ver", person: "1pl", translation: "私たちは友達に会った。" },
+                { id: 48, sentence: "Eles ___ tudo.", answer: "viram", infinitive: "ver", person: "3pl", translation: "彼らはすべてを目撃した。" },
+                { id: 49, sentence: "Eu ___ o meu violão.", answer: "trouxe", infinitive: "trazer", person: "1sg", translation: "私はギターを持って来た。" },
+                { id: 50, sentence: "Ela ___ um bolo.", answer: "trouxe", infinitive: "trazer", person: "3sg", translation: "彼女はケーキを持って来た。" },
+                { id: 51, sentence: "Nós ___ boas notícias.", answer: "trouxemos", infinitive: "trazer", person: "1pl", translation: "私たちは良い知らせを持って来た。" },
+                { id: 52, sentence: "Eles ___ os documentos.", answer: "trouxeram", infinitive: "trazer", person: "3pl", translation: "彼らは書類を持って来た。" },
+                { id: 53, sentence: "Eu ___ de casa cedo.", answer: "saí", infinitive: "sair", person: "1sg", translation: "私は朝早く家を出た。" },
+                { id: 54, sentence: "Ele ___ com os amigos.", answer: "saiu", infinitive: "sair", person: "3sg", translation: "彼は友達と出かけた。" },
+                { id: 55, sentence: "Nós ___ para jantar.", answer: "saímos", infinitive: "sair", person: "1pl", translation: "私たちは夕食に出かけた。" },
+                { id: 56, sentence: "Elas ___ cedo do trabalho.", answer: "saíram", infinitive: "sair", person: "3pl", translation: "彼女たちは仕事から早く上がった。" },
+                { id: 57, sentence: "Eu ___ o livro na mesa.", answer: "pus", infinitive: "pôr", person: "1sg", translation: "私は机の上に本を置いた。" },
+                { id: 58, sentence: "Ela ___ açúcar no café.", answer: "pôs", infinitive: "pôr", person: "3sg", translation: "彼女はコーヒーに砂糖を入れた。" },
+                { id: 59, sentence: "Nós ___ ordem na sala.", answer: "pusemos", infinitive: "pôr", person: "1pl", translation: "私たちは部屋を片付けた。" },
+                { id: 60, sentence: "Eles ___ as chaves ali.", answer: "puseram", infinitive: "pôr", person: "3pl", translation: "彼らはそこに鍵を置いた。" },
+                { id: 61, sentence: "___ muitos problemas ontem.", answer: "houve", infinitive: "haver", person: "3sg", translation: "昨日、たくさんのトラブルがあった。" }
+            ],
+            imperfect: [
+                { id: 1, sentence: "Antigamente, eu ___ muito tímido.", answer: "era", infinitive: "ser", person: "1sg", translation: "昔、私はとても内気だった。" },
+                { id: 2, sentence: "Ele ___ uma criança alegre.", answer: "era", infinitive: "ser", person: "3sg", translation: "彼は陽気な子供だった。" },
+                { id: 3, sentence: "Nós ___ felizes naquela época.", answer: "éramos", infinitive: "ser", person: "1pl", translation: "私たちはその頃幸せだった。" },
+                { id: 4, sentence: "Eles ___ amigos de infância.", answer: "eram", infinitive: "ser", person: "3pl", translation: "彼らは子供のころからの友達だった。" },
+                { id: 5, sentence: "Eu ___ um carro velho.", answer: "tinha", infinitive: "ter", person: "1sg", translation: "私は古い車を持っていた。" },
+                { id: 6, sentence: "Ela ___ muitos sonhos.", answer: "tinha", infinitive: "ter", person: "3sg", translation: "彼女は多くの夢を持っていた。" },
+                { id: 7, sentence: "Nós ___ muito tempo livre.", answer: "tínhamos", infinitive: "ter", person: "1pl", translation: "私たちはたくさんの自由時間があった。" },
+                { id: 8, sentence: "Eles ___ dúvidas.", answer: "tinham", infinitive: "ter", person: "3pl", translation: "彼らは疑問を持っていた。" },
+                { id: 9, sentence: "Eu ___ aqui todo dia.", answer: "vinha", infinitive: "vir", person: "1sg", translation: "私は毎日ここに来ていた。" },
+                { id: 10, sentence: "Ele ___ de ônibus.", answer: "vinha", infinitive: "vir", person: "3sg", translation: "彼はバスで来ていた。" },
+                { id: 11, sentence: "Nós ___ sempre juntos.", answer: "vínhamos", infinitive: "vir", person: "1pl", translation: "私たちはいつも一緒にやって来ていた。" },
+                { id: 12, sentence: "Eles ___ de longe.", answer: "vinham", infinitive: "vir", person: "3pl", translation: "彼らは遠くからやって来ていた。" },
+                { id: 13, sentence: "Eu ___ a mesa.", answer: "punha", infinitive: "pôr", person: "1sg", translation: "私はテーブルセッティングをしていた。" },
+                { id: 14, sentence: "Ela ___ o chapéu.", answer: "punha", infinitive: "pôr", person: "3sg", translation: "彼女は帽子をかぶっていた。" },
+                { id: 15, sentence: "Nós ___ ordem no quarto.", answer: "púnhamos", infinitive: "pôr", person: "1pl", translation: "私たちは部屋を片付けていた。" },
+                { id: 16, sentence: "Eles ___ música alta.", answer: "punham", infinitive: "pôr", person: "3pl", translation: "彼らは大きな音で音楽をかけていた。" }
+            ],
+            subjunctive: [
+                { id: 1, sentence: "Espero que eu ___ feliz.", answer: "seja", infinitive: "ser", person: "1sg", translation: "私が幸せであることを願う。" },
+                { id: 2, sentence: "Quero que ele ___ um bom profissional.", answer: "seja", infinitive: "ser", person: "3sg", translation: "私は彼に優秀なプロであってほしい。" },
+                { id: 3, sentence: "Embora nós ___ amigos...", answer: "sejamos", infinitive: "ser", person: "1pl", translation: "たとえ私たちが友達であっても..." },
+                { id: 4, sentence: "Duvido que eles ___ ricos.", answer: "sejam", infinitive: "ser", person: "3pl", translation: "私は彼らが金持ちだとは疑わしい。" },
+                { id: 5, sentence: "Quero que você ___ bem.", answer: "esteja", infinitive: "estar", person: "3sg", translation: "私はあなたが元気であることを望む。" },
+                { id: 6, sentence: "Espero que nós ___ prontos.", answer: "estejamos", infinitive: "estar", person: "1pl", translation: "私たちが準備できていることを願う。" },
+                { id: 7, sentence: "Talvez elas ___ em casa.", answer: "estejam", infinitive: "estar", person: "3pl", translation: "おそらく彼女たちは家にいるだろう。" },
+                { id: 8, sentence: "Quero que eu ___ lá.", answer: "vá", infinitive: "ir", person: "1sg", translation: "私はそこに行きたい（接続法）。" },
+                { id: 9, sentence: "É importante que ele ___.", answer: "vá", infinitive: "ir", person: "3sg", translation: "彼が行くことが重要だ。" },
+                { id: 10, sentence: "Quero que você ___ a verdade.", answer: "saiba", infinitive: "saber", person: "3sg", translation: "私はあなたに真実を知ってほしい。" },
+                { id: 11, sentence: "Espero que nós ___ de tudo.", answer: "saibamos", infinitive: "saber", person: "1pl", translation: "私たちがすべてを知っていることを願う。" },
+                { id: 12, sentence: "Talvez eles ___ a resposta.", answer: "saibam", infinitive: "saber", person: "3pl", translation: "おそらく彼らは答えを知っているだろう。" }
+            ]
+        };
+
+        const modeNames = {
+            present: "現在形",
+            preterite: "完全過去形",
+            imperfect: "不完全過去形",
+            subjunctive: "接続法現在形"
+        };
+
+        let currentMode = null;
+
+        function loadStatsForMode(mode) {
+            try {
+                let allStats = JSON.parse(localStorage.getItem('quizStatsByMode')) || {};
+                if (!allStats[mode]) {
+                    allStats[mode] = {};
+                }
+                return allStats[mode];
+            } catch (e) {
+                return {};
+            }
+        }
+
+        function saveStatsForMode(mode, stats) {
+            try {
+                let allStats = JSON.parse(localStorage.getItem('quizStatsByMode')) || {};
+                allStats[mode] = stats;
+                localStorage.setItem('quizStatsByMode', JSON.stringify(allStats));
+            } catch (e) {}
+        }
+
+        function resetAllStats() {
+            if (confirm("すべてのモードの出題回数や誤答数をリセットして初期化しますか？")) {
+                localStorage.removeItem('quizStatsByMode');
+                alert("初期化しました。");
+                showTopMenu();
+            }
+        }
+
+        let currentQuizStats = {};
+        let availableQuizes = [];
+        let currentQuiz = {};
+        let score = 0;
+        let isWaitingForNext = false;
+        let sessionWrongQuestions = []; 
+        let allTimeWrongQuestions = []; 
+
+        let audioCtx = null;
+        function getAudioContext() {
+            if (!audioCtx) {
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                if (AudioContext) {
+                    audioCtx = new AudioContext();
+                }
+            }
+            return audioCtx;
+        }
+
+        function playSound(type) {
+            try {
+                const ctx = getAudioContext();
+                if (!ctx) return;
+                if (ctx.state === 'suspended') {
+                    ctx.resume();
+                }
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+
+                const now = ctx.currentTime;
+
+                if (type === 'correct') {
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(587.33, now);
+                    osc.frequency.setValueAtTime(880, now + 0.1);
+                    gain.gain.setValueAtTime(0.15, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+                    osc.start(now);
+                    osc.stop(now + 0.3);
+                } else if (type === 'incorrect') {
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(150, now);
+                    osc.frequency.setValueAtTime(110, now + 0.15);
+                    gain.gain.setValueAtTime(0.2, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+                    osc.start(now);
+                    osc.stop(now + 0.35);
+                }
+            } catch (e) {}
+        }
+
+        function playAudio() {
+            if (!currentQuiz.sentence) return;
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                const cleanAnswer = currentQuiz.answer.replace(/\s*\(.*\)/, '');
+                const fullSentence = currentQuiz.sentence.replace('___', cleanAnswer);
+                const utterance = new SpeechSynthesisUtterance(fullSentence);
+                utterance.lang = 'pt-BR';
+                utterance.rate = 0.9;
+                window.speechSynthesis.speak(utterance);
+            }
+        }
+
+        function normalizeAccents(str) {
+            return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+        }
+
+        function showTopMenu() {
+            currentMode = null;
+            const card = document.getElementById("app-card");
+            card.innerHTML = `
+                <h1>ブラジル・ポルトガル語 不規則動詞マスター</h1>
+                <div class="subtitle">学習したい時制モードを選択してください</div>
+                <div class="menu-container">
+                    <button onclick="startMode('present')">現在形</button>
+                    <button onclick="startMode('preterite')">完全過去形</button>
+                    <button onclick="startMode('imperfect')">不完全過去形</button>
+                    <button onclick="startMode('subjunctive')">接続法現在形</button>
+                    <button onclick="resetAllStats()" class="btn-danger" style="margin-top: 1rem;">学習データをリセット・初期化</button>
+                </div>
+            `;
+        }
+
+        function startMode(mode) {
+            currentMode = mode;
+            currentQuizStats = loadStatsForMode(mode);
+            startNormalMode();
+        }
+
+        function getMasterData() {
+            const baseData = quizDatabases[currentMode] || [];
+            return baseData.map(q => {
+                if (!currentQuizStats[q.id]) {
+                    currentQuizStats[q.id] = { appeared: 0, incorrect: 0 };
+                }
+                return {
+                    ...q,
+                    appeared: currentQuizStats[q.id].appeared,
+                    incorrect: currentQuizStats[q.id].incorrect
+                };
+            });
+        }
+
+        function startNormalMode() {
+            const master = getMasterData();
+            master.sort((a, b) => {
+                if (a.appeared !== b.appeared) {
+                    return a.appeared - b.appeared;
+                }
+                return Math.random() - 0.5;
+            });
+
+            availableQuizes = master.slice(0, 10);
+            setupGame("通常モード (未出題優先)");
+        }
+
+        function startWeaknessMode() {
+            const master = getMasterData();
+            master.sort((a, b) => {
+                if (b.incorrect !== a.incorrect) {
+                    return b.incorrect - a.incorrect;
+                }
+                return a.appeared - b.appeared;
+            });
+
+            const filtered = master.filter(q => q.incorrect > 0);
+            if (filtered.length > 0) {
+                availableQuizes = filtered.slice(0, 10);
+            } else {
+                availableQuizes = master.slice(0, 10);
+            }
+
+            setupGame("苦手特訓モード (不正解が多い問題)");
+        }
+
+        function setupGame(modeSubName) {
+            score = 0;
+            sessionWrongQuestions = [];
+            allTimeWrongQuestions = [];
+            isWaitingForNext = false;
+
+            const card = document.getElementById("app-card");
+            card.innerHTML = `
+                <h1>${modeNames[currentMode]}</h1>
+                <div class="subtitle" id="mode-subtitle">モード: ${modeSubName}</div>
+                <div class="settings-box">
+                    <label><input type="checkbox" id="auto-audio-toggle" ${isAutoAudioEnabled ? 'checked' : ''} onchange="toggleAudioSetting()"> 解答後に音声を自動再生する</label>
+                </div>
+                <div class="score">残り問題数: <span id="remaining-count">10</span> / 正解数: <span id="score">0</span></div>
+
+                <div class="sentence-box" id="quiz-container">
+                    <div class="sentence" id="sentence-display"></div>
+                    <div class="hint" id="hint-display"></div>
+                    <div class="translation" id="translation-display"></div>
+                    <button class="audio-btn" onclick="playAudio()">🔊 例文の音声を聴く</button>
+                </div>
+
+                <div id="quiz-area">
+                    <input type="text" id="user-answer" placeholder="空欄に入る活用を入力" autocomplete="off" autocapitalize="none" autocorrect="off">
+                    <button id="submit-btn" onclick="handleAction()">回答する</button>
+                </div>
+
+                <div class="feedback" id="feedback"></div>
+                <button onclick="showTopMenu()" id="back-to-top-btn" class="btn-secondary" style="margin-top: 1rem;">トップページに戻る</button>
+            `;
+
+            const inputField = document.getElementById("user-answer");
+            if (inputField) {
+                inputField.addEventListener("keypress", function(event) {
+                    if (event.key === "Enter") {
+                        handleAction();
+                    }
+                });
+            }
+
+            nextQuestion();
+        }
+
+        function toggleAudioSetting() {
+            const toggle = document.getElementById("auto-audio-toggle");
+            if (toggle) {
+                isAutoAudioEnabled = toggle.checked;
+            }
+        }
+
+        function nextQuestion() {
+            if (availableQuizes.length === 0) {
+                if (sessionWrongQuestions.length > 0) {
+                    availableQuizes = [...sessionWrongQuestions];
+                    sessionWrongQuestions = [];
+                } else {
+                    showClearScreen();
+                    return;
+                }
+            }
+
+            isWaitingForNext = false;
+            const submitBtn = document.getElementById("submit-btn");
+            const remainingCount = document.getElementById("remaining-count");
+            if (submitBtn) submitBtn.textContent = "回答する";
+            if (remainingCount) remainingCount.textContent = availableQuizes.length;
+
+            const randomIndex = Math.floor(Math.random() * availableQuizes.length);
+            currentQuiz = availableQuizes[randomIndex];
+
+            if (!currentQuizStats[currentQuiz.id]) {
+                currentQuizStats[currentQuiz.id] = { appeared: 0, incorrect: 0 };
+            }
+            currentQuizStats[currentQuiz.id].appeared++;
+            saveStatsForMode(currentMode, currentQuizStats);
+
+            const sentenceDisplay = document.getElementById("sentence-display");
+            const hintDisplay = document.getElementById("hint-display");
+            const translationDisplay = document.getElementById("translation-display");
+            const userAnswer = document.getElementById("user-answer");
+            const feedback = document.getElementById("feedback");
+
+            if (sentenceDisplay) sentenceDisplay.textContent = currentQuiz.sentence;
+            if (hintDisplay) hintDisplay.textContent = `ヒント: 動詞 [${currentQuiz.infinitive}] (${currentQuiz.person})`;
+            if (translationDisplay) translationDisplay.textContent = `訳: ${currentQuiz.translation}`;
+            if (userAnswer) {
+                userAnswer.value = "";
+                userAnswer.focus();
+            }
+            if (feedback) feedback.textContent = "";
+        }
+
+        function handleAction() {
+            if (isWaitingForNext) {
+                const index = availableQuizes.indexOf(currentQuiz);
+                if (index > -1) {
+                    availableQuizes.splice(index, 1);
+                }
+
+                if (availableQuizes.length === 0 && sessionWrongQuestions.length === 0) {
+                    showClearScreen();
+                } else {
+                    nextQuestion();
+                }
+                return;
+            }
+
+            const userAnswerEl = document.getElementById("user-answer");
+            if (!userAnswerEl) return;
+
+            const rawUserAnswer = userAnswerEl.value.trim().toLowerCase();
+            const correctAnswer = currentQuiz.answer;
+            const feedbackEl = document.getElementById("feedback");
+
+            const normalizedUser = normalizeAccents(rawUserAnswer);
+            const normalizedCorrect = normalizeAccents(correctAnswer);
+
+            if (normalizedUser === normalizedCorrect) {
+                playSound('correct');
+                
+                if (rawUserAnswer === correctAnswer) {
+                    feedbackEl.textContent = "正解！ 🎉（次へ進むにはEnterまたはボタンを押してください）";
+                } else {
+                    feedbackEl.textContent = `正解です！ 🎉 （※ただし、本当は "${correctAnswer}" のようにアクセント記号が付きます）\n（次へ進むにはEnterまたはボタンを押してください）`;
+                }
+                feedbackEl.className = "feedback correct";
+                score++;
+                
+                const scoreEl = document.getElementById("score");
+                if (scoreEl) scoreEl.textContent = score;
+
+                if (isAutoAudioEnabled) {
+                    setTimeout(() => {
+                        playAudio();
+                    }, 300);
+                }
+
+                isWaitingForNext = true;
+                const submitBtn = document.getElementById("submit-btn");
+                if (submitBtn) submitBtn.textContent = "次へ進む";
+                userAnswerEl.focus();
+
+            } else {
+                playSound('incorrect');
+                feedbackEl.textContent = `不正解... 正解は "${correctAnswer}" です（次へ進むにはEnterまたはボタンを押してください）`;
+                feedbackEl.className = "feedback incorrect";
+                
+                if (!currentQuizStats[currentQuiz.id]) {
+                    currentQuizStats[currentQuiz.id] = { appeared: 0, incorrect: 0 };
+                }
+                currentQuizStats[currentQuiz.id].incorrect++;
+                saveStatsForMode(currentMode, currentQuizStats);
+
+                if (!sessionWrongQuestions.includes(currentQuiz)) {
+                    sessionWrongQuestions.push(currentQuiz);
+                }
+                if (!allTimeWrongQuestions.includes(currentQuiz)) {
+                    allTimeWrongQuestions.push(currentQuiz);
+                }
+
+                if (isAutoAudioEnabled) {
+                    setTimeout(() => {
+                        playAudio();
+                    }, 300);
+                }
+
+                isWaitingForNext = true;
+                const submitBtn = document.getElementById("submit-btn");
+                if (submitBtn) submitBtn.textContent = "次へ進む";
+                userAnswerEl.focus();
+            }
+        }
+
+        function showClearScreen() {
+            isWaitingForNext = false;
+            const quizContainer = document.getElementById("quiz-container");
+            const quizArea = document.getElementById("quiz-area");
+            const remainingCount = document.getElementById("remaining-count");
+            const scoreEl = document.getElementById("score");
+            const feedbackEl = document.getElementById("feedback");
+            const backToTopBtn = document.getElementById("back-to-top-btn");
+
+            if (quizContainer) quizContainer.style.display = "none";
+            if (quizArea) quizArea.style.display = "none";
+            if (remainingCount) remainingCount.textContent = 0;
+            if (scoreEl) scoreEl.textContent = score;
+            
+            // 下部の共通「トップページに戻る」ボタンを非表示にする
+            if (backToTopBtn) backToTopBtn.style.display = "none";
+            
+            let htmlContent = `<div style="font-size: 1.2rem; margin-bottom: 1rem; color: #27ae60;">セッション終了！お疲れ様でした！🎉</div>`;
+            
+            if (allTimeWrongQuestions.length > 0) {
+                htmlContent += `<button onclick="startReviewMode()" class="btn-secondary">今回間違えた問題 (${allTimeWrongQuestions.length}問) を復習する</button>`;
+            }
+
+            htmlContent += `<button onclick="startNormalMode()">未出題優先モードで次の10問に行く</button>`;
+            htmlContent += `<button onclick="startWeaknessMode()" class="btn-danger">苦手特訓モードで10問挑戦する</button>`;
+            htmlContent += `<button onclick="showTopMenu()" class="btn-warning" style="margin-top: 1rem;">トップページに戻る</button>`;
+
+            if (feedbackEl) {
+                feedbackEl.innerHTML = htmlContent;
+                feedbackEl.className = "feedback";
+            }
+        }
+
+        function startReviewMode() {
+            if (allTimeWrongQuestions.length === 0) return;
+            availableQuizes = [...allTimeWrongQuestions];
+            sessionWrongQuestions = [];
+            allTimeWrongQuestions = [];
+            score = 0;
+            isWaitingForNext = false;
+            
+            const modeSubtitle = document.getElementById("mode-subtitle");
+            const quizContainer = document.getElementById("quiz-container");
+            const quizArea = document.getElementById("quiz-area");
+            const submitBtn = document.getElementById("submit-btn");
+            const backToTopBtn = document.getElementById("back-to-top-btn");
+
+            if (modeSubtitle) modeSubtitle.textContent = "【復習モード】直近で間違えた問題";
+            if (quizContainer) quizContainer.style.display = "block";
+            if (quizArea) quizArea.style.display = "block";
+            if (submitBtn) submitBtn.textContent = "回答する";
+            if (backToTopBtn) backToTopBtn.style.display = "block";
+            nextQuestion();
+        }
+
+        // 初期表示
+        showTopMenu();
+    </script>
+
+</body>
+</html>
