@@ -502,14 +502,33 @@
 
         function startNormalMode() {
             const master = getMasterData();
-            master.sort((a, b) => {
+            
+            // 全問1周（すべての問題の appeared が 1回以上）しているかチェック
+            const totalQuestionsInMode = quizDatabases[currentMode].length;
+            let completedCount = 0;
+            for (let id in currentQuizStats) {
+                if (currentQuizStats[id].appeared > 0) {
+                    completedCount++;
+                }
+            }
+
+            // 1周し終えていたら、出題回数をすべてリセットして0に戻す
+            if (completedCount >= totalQuestionsInMode) {
+                for (let id in currentQuizStats) {
+                    currentQuizStats[id].appeared = 0;
+                }
+                saveStatsForMode(currentMode, currentQuizStats);
+            }
+
+            const updatedMaster = getMasterData();
+            updatedMaster.sort((a, b) => {
                 if (a.appeared !== b.appeared) {
                     return a.appeared - b.appeared;
                 }
                 return Math.random() - 0.5;
             });
 
-            availableQuizes = master.slice(0, 10);
+            availableQuizes = updatedMaster.slice(0, 10);
             setupGame("通常モード (未出題優先)");
         }
 
@@ -542,7 +561,6 @@
 
             if (totalProgressEl && currentMode && quizDatabases[currentMode]) {
                 const totalQuestionsInMode = quizDatabases[currentMode].length;
-                // appear が 1回以上の問題数を「完了した問題」として数える
                 let completedCount = 0;
                 for (let id in currentQuizStats) {
                     if (currentQuizStats[id].appeared > 0) {
@@ -571,7 +589,7 @@
                 </div>
                 <div class="score">
                     残り問題数 (今回の10問): <span id="remaining-count">10</span> / 正解数: <span id="score">0</span><br>
-                    時制の進捗: <span id="total-progress">算出中...</span>
+                    全体進捗: <span id="total-progress">算出中...</span>
                 </div>
 
                 <div class="sentence-box" id="quiz-container">
@@ -744,8 +762,6 @@
             if (quizArea) quizArea.style.display = "none";
             if (remainingCount) remainingCount.textContent = 0;
             if (scoreEl) scoreEl.textContent = score;
-            
-            // 下部の共通「トップページに戻る」ボタンを非表示にする
             if (backToTopBtn) backToTopBtn.style.display = "none";
             
             let htmlContent = `<div style="font-size: 1.2rem; margin-bottom: 1rem; color: #27ae60;">セッション終了！お疲れ様でした！🎉</div>`;
