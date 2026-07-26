@@ -559,10 +559,20 @@
         function startWeaknessMode() {
             initAudioOnInteraction();
             const master = getMasterData();
+            
             master.sort((a, b) => {
+                const rateA = a.appeared > 0 ? (a.incorrect / a.appeared) : 0;
+                const rateB = b.appeared > 0 ? (b.incorrect / b.appeared) : 0;
+
+                // 第1優先：誤答割合が高い順 (rateB - rateA)
+                if (rateB !== rateA) {
+                    return rateB - rateA;
+                }
+                // 第2優先：誤答回数が多い順 (b.incorrect - a.incorrect)
                 if (b.incorrect !== a.incorrect) {
                     return b.incorrect - a.incorrect;
                 }
+                // 第3優先（補助）：出題回数が少ない順
                 return a.appeared - b.appeared;
             });
 
@@ -573,7 +583,7 @@
                 availableQuizes = master.slice(0, 10);
             }
 
-            setupGame("苦手特訓モード (不正解が多い問題)");
+            setupGame("苦手特訓モード (誤答割合・回数優先)");
         }
 
         function updateProgressDisplay() {
